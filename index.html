@@ -428,7 +428,7 @@ footer{max-width:1100px;margin:40px auto 0;padding:24px 16px;border-top:1px soli
       <span style="opacity:.7;font-size:12px">※ 로컬/Claude 데모 환경에서는 동작하지 않을 수 있습니다.</span>
     </div>
     <div class="field">
-      <label>사이트 URL</label>
+      <label>사이트 URL <span style="color:var(--red);font-size:11px">★ 필수 — 카카오 링크에 사용됨</span></label>
       <input id="sSiteUrl" placeholder="https://my-news-site.com" />
       <div class="hint">카카오 개발자 콘솔에 등록한 도메인과 동일해야 합니다.</div>
     </div>
@@ -523,9 +523,16 @@ function toast(msg){
   clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2500);
 }
 function getArticleUrl(id){
-  const base=(settings.siteUrl||'').replace(/\/$/,'');
-  if(base) return base+'?a='+encodeURIComponent(id);
-  try{ return location.href.split('?')[0].split('#')[0]+'?a='+encodeURIComponent(id); }catch(e){ return '?a='+encodeURIComponent(id); }
+  if(settings.siteUrl&&settings.siteUrl.startsWith('http')){
+    return settings.siteUrl.replace(/\/$/,'')+'?a='+encodeURIComponent(id);
+  }
+  // 배포 환경에서 siteUrl 미설정 시 현재 origin 사용
+  try{
+    if(location.protocol==='http:'||location.protocol==='https:'){
+      return location.origin+location.pathname+'?a='+encodeURIComponent(id);
+    }
+  }catch(e){}
+  return '';
 }
 function getArticlePath(id){ return '?a='+encodeURIComponent(id); }
 function safePush(url){ try{ history.pushState({},'',url); }catch(e){} }
@@ -996,27 +1003,34 @@ async function saveSettings(){
 }
 async function kakaoShare(id){
   const article=state.articles.find(a=>a.id===id);if(!article)return;
-  if(window.Kakao&&Kakao.isInitialized()){
-    try{
-      const articleUrl=getArticleUrl(id);
-      await Kakao.Share.sendDefault({
-        objectType:'feed',
-        content:{
-          title:article.title,
-          description:article.summary,
-          imageUrl:article.img||'',
-          link:{mobileWebUrl:articleUrl,webUrl:articleUrl}
-        }
-      });
-      return;
-    }catch(e){
-      if(!(e instanceof TypeError)&&e.name!=='AbortError'){
-        toast('⚠️ 카카오 공유 실패. 앱 키·도메인 등록을 확인하세요.');return;
-      }
-    }
-  }else{
-    toast('⚠️ 관리자 메뉴 → 사이트 설정에서 카카오 앱 키를 입력하세요.');
+
+  // ① 배포 URL 미설정 → 설정 모달 바로 열기
+  if(!settings.siteUrl||!settings.siteUrl.startsWith('http')){
+    toast('🔗 사이트 설정에 배포 URL을 먼저 입력하세요!');
+    setTimeout(openSettings, 400);
     return;
+  }
+  // ② 카카오 앱키 미설정
+  if(!window.Kakao||!Kakao.isInitialized()){
+    toast('🔑 사이트 설정에서 카카오 앱 키를 입력하세요!');
+    setTimeout(openSettings, 400);
+    return;
+  }
+
+  const articleUrl = settings.siteUrl.replace(/\/$/,'') + '?a=' + encodeURIComponent(id);
+  try{
+    await Kakao.Share.sendDefault({
+      objectType:'feed',
+      content:{
+        title: article.title,
+        description: article.summary,
+        imageUrl: article.img||'',
+        link:{ mobileWebUrl: articleUrl, webUrl: articleUrl }
+      }
+    });
+  }catch(e){
+    if(e.name==='AbortError')return;
+    toast('⚠️ 카카오 공유 실패: 앱 키 또는 도메인 등록을 확인하세요.');
   }
 }
 
