@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Chronicle</title>
+<!-- OG / Twitter meta (JS로 동적 업데이트) -->
+<meta id="og-t" property="og:title" content="The Chronicle" />
+<meta id="og-d" property="og:description" content="The Chronicle — 빠르고 정확한 최신 뉴스." />
+<meta id="og-i" property="og:image" content="" />
+<meta id="og-u" property="og:url" content="" />
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="The Chronicle" />
+<meta id="tw-c" name="twitter:card" content="summary_large_image" />
+<meta id="tw-t" name="twitter:title" content="The Chronicle" />
+<meta id="tw-d" name="twitter:description" content="" />
+<meta id="tw-i" name="twitter:image" content="" />
+<script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.4/kakao.min.js" crossorigin="anonymous"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;0,8..60,900;1,8..60,400&family=Libre+Franklin:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --red:#c4161c; --ink:#101010; --muted:#5b5b5b; --line:#e3e3e3;
+  --bg:#ffffff;
+  --serif:'Source Serif 4',Georgia,'Times New Roman',serif;
+  --sans:'Libre Franklin','Helvetica Neue',Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+body{padding-bottom:60px}
+img{max-width:100%;display:block}
+button{font-family:var(--sans);cursor:pointer}
+a{color:inherit;text-decoration:none}
+
+/* ── Drawer backdrop ── */
+.drawer-backdrop{
+  position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:45;
+  pointer-events:none;opacity:0;transition:opacity .28s;
+}
+.drawer-backdrop.open{pointer-events:all;opacity:1}
+
+/* ── Drawer panel ── */
+.drawer{
+  position:fixed;top:0;left:0;
+  width:min(86vw,380px);height:100vh;
+  background:#fff;z-index:50;
+  transform:translateX(-100%);
+  transition:transform .28s cubic-bezier(.4,0,.2,1);
+  overflow-y:auto;-webkit-overflow-scrolling:touch;
+  box-shadow:4px 0 30px rgba(0,0,0,.18);
+}
+.drawer.open{transform:translateX(0)}
+.drawer-top{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 16px;height:64px;
+  border-bottom:2px solid var(--ink);
+  position:sticky;top:0;background:#fff;z-index:1;
+}
+.drawer-logo{
+  font-family:var(--serif);font-weight:900;font-size:18px;
+  text-transform:uppercase;letter-spacing:-.3px;
+}
+.drawer-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:17px 20px;border-bottom:1px solid var(--line);
+  cursor:pointer;font-size:17px;font-weight:700;letter-spacing:-.2px;
+  transition:background .12s;user-select:none;
+}
+.drawer-item:hover{background:#f7f7f7}
+.drawer-item.expanded{background:#f0f0f0}
+.drawer-chev{display:flex;align-items:center;color:var(--muted);transition:transform .2s}
+.drawer-chev.rot{transform:rotate(180deg)}
+.drawer-sub{display:none}
+.drawer-sub.open{display:block}
+.drawer-sub-item{
+  display:flex;align-items:center;
+  padding:13px 20px 13px 34px;
+  border-bottom:1px solid var(--line);
+  font-size:15px;font-weight:500;cursor:pointer;color:#333;
+  transition:background .12s;user-select:none;
+}
+.drawer-sub-item:hover{background:#f0f0f0}
+.drawer-sub-item.all-sub{font-weight:700;color:var(--ink)}
+
+/* ── Topbar ── */
+header.topbar{
+  position:sticky;top:0;z-index:40;background:#fff;
+  border-bottom:1px solid var(--line);
+}
+.topbar-inner{
+  max-width:1100px;margin:0 auto;height:64px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 16px;
+}
+.left-tools{display:flex;align-items:center;gap:18px}
+.icon-btn{
+  background:none;border:none;display:flex;align-items:center;justify-content:center;
+  width:34px;height:34px;border-radius:6px;color:var(--ink);transition:background .15s;
+}
+.icon-btn:hover{background:#f1f1f1}
+.icon-btn svg{width:24px;height:24px}
+.masthead{
+  font-family:var(--serif);font-weight:900;letter-spacing:-.5px;
+  font-size:clamp(20px,5vw,28px);text-transform:uppercase;
+  display:flex;align-items:center;
+}
+.m-bar{display:inline-block;width:10px;height:1.05em;background:var(--red);margin-right:10px;transform:translateY(2px)}
+.m-the{font-size:.55em;font-weight:600;letter-spacing:2px;margin-right:8px;opacity:.85}
+.profile-wrap{position:relative}
+.avatar-pill{
+  display:flex;align-items:center;gap:8px;border:1px solid var(--line);
+  background:#fff;border-radius:999px;padding:4px 6px 4px 12px;color:var(--ink);
+  font-size:13px;font-weight:600;transition:border-color .15s;
+}
+.avatar-pill:hover{border-color:#bbb}
+.avatar-circle{
+  width:30px;height:30px;border-radius:50%;background:var(--ink);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;
+}
+.avatar-circle.guest{background:#eee;color:var(--ink)}
+.role-tag{font-size:9px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:#fff;background:var(--red);border-radius:3px;padding:2px 5px;margin-left:2px}
+.role-tag.journalist{background:#1763c4}
+.role-tag.user{background:#777}
+.menu{
+  position:absolute;right:0;top:48px;background:#fff;border:1px solid var(--line);
+  border-radius:10px;min-width:220px;box-shadow:0 12px 34px rgba(0,0,0,.13);
+  overflow:hidden;display:none;
+}
+.menu.open{display:block;animation:pop .12s ease}
+@keyframes pop{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.menu .m-head{padding:14px 16px;border-bottom:1px solid var(--line)}
+.menu .m-head .name{font-weight:700;font-size:15px}
+.menu .m-head .sub{font-size:12px;color:var(--muted);margin-top:2px}
+.menu button.m-item{
+  width:100%;text-align:left;background:none;border:none;padding:12px 16px;
+  font-size:14px;font-weight:500;display:flex;align-items:center;gap:10px;color:var(--ink);
+}
+.menu button.m-item:hover{background:#f5f5f5}
+.menu button.m-item.danger{color:var(--red)}
+.menu .m-sep{height:1px;background:var(--line)}
+
+/* ── Filter bar ── */
+.filter-bar{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 0;border-bottom:1px solid var(--line);margin-bottom:4px;
+}
+.filter-name{font-size:13px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--red)}
+.filter-clear{
+  background:none;border:1px solid var(--line);border-radius:999px;
+  padding:4px 10px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;
+  transition:border-color .15s,color .15s;
+}
+.filter-clear:hover{border-color:#999;color:var(--ink)}
+
+/* ── Layout ── */
+main{max-width:1100px;margin:0 auto;padding:0 16px}
+.kicker{
+  display:flex;align-items:center;gap:8px;color:var(--red);
+  font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;
+  margin:22px 0 2px;
+}
+.lead{padding:8px 0 26px;border-bottom:1px solid var(--line);cursor:pointer}
+.lead .hero-img{width:100%;aspect-ratio:16/9;object-fit:cover;background:#eee;border-radius:2px}
+.lead h1{
+  font-family:var(--serif);font-weight:700;line-height:1.06;
+  font-size:clamp(30px,7vw,52px);margin:18px 0 14px;letter-spacing:-.5px;
+}
+.l-sum{font-family:var(--serif);font-size:clamp(17px,3.6vw,21px);line-height:1.45;color:#222}
+.meta{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:13px;font-weight:500;margin-top:16px}
+.meta .cat{color:var(--ink);font-weight:600}
+.meta .dot{width:1px;height:14px;background:#cfcfcf}
+.stories{padding:6px 0 40px}
+.story{
+  display:grid;grid-template-columns:1fr 150px;gap:18px;
+  padding:22px 0;border-bottom:1px solid var(--line);cursor:pointer;align-items:start;
+}
+.story:hover h2{color:var(--red)}
+.story h2{
+  font-family:var(--serif);font-weight:700;line-height:1.12;
+  font-size:clamp(20px,4.6vw,26px);transition:color .15s;
+}
+.s-sum{font-family:var(--serif);color:#333;font-size:15px;line-height:1.4;margin-top:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.thumb{width:150px;height:100px;object-fit:cover;background:#eee;border-radius:2px}
+.thumb.empty{background:linear-gradient(135deg,#ececec,#dadada)}
+@media(max-width:600px){
+  .story{grid-template-columns:1fr 110px;gap:12px}
+  .thumb{width:110px;height:78px}
+  .s-sum{display:none}
+}
+.empty-state{padding:80px 10px;text-align:center;color:var(--muted)}
+.empty-state h3{font-family:var(--serif);font-size:24px;color:var(--ink);margin-bottom:8px}
+
+/* ── Article view ── */
+.article-wrap{max-width:720px;margin:0 auto;padding:8px 16px 60px}
+.back-btn{
+  display:inline-flex;align-items:center;gap:6px;background:none;border:none;
+  color:var(--red);font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.5px;
+  margin:18px 0;padding:0;
+}
+.back-btn:hover{text-decoration:underline}
+.article-wrap h1{font-family:var(--serif);font-weight:700;line-height:1.08;font-size:clamp(28px,6.5vw,44px);letter-spacing:-.5px;margin-bottom:14px}
+.a-img{width:100%;aspect-ratio:16/9;object-fit:cover;background:#eee;border-radius:2px;margin:20px 0}
+.a-body{font-family:var(--serif);font-size:18px;line-height:1.7;color:#1a1a1a;margin-top:10px}
+.a-body p{margin-bottom:20px}
+
+/* ── Share section ── */
+.share-section{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:20px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  margin:36px 0 0;
+}
+.share-label{font-size:13px;font-weight:700;color:var(--muted);flex-shrink:0;margin-right:4px}
+.share-btn{
+  display:inline-flex;align-items:center;gap:7px;
+  background:#f7f7f7;border:1px solid var(--line);border-radius:999px;
+  padding:9px 16px;font-size:13px;font-weight:700;color:var(--ink);
+  cursor:pointer;transition:background .15s,border-color .15s;font-family:var(--sans);
+}
+.share-btn:hover{background:#efefef;border-color:#bbb}
+.share-btn.kakao{background:#FEE500;border-color:#FEE500;color:#191919;font-weight:800}
+.share-btn.kakao:hover{background:#fad900;border-color:#e6c800}
+.setup-box{background:#fffbea;border:1px solid #f5de6a;border-radius:8px;padding:14px 16px;font-size:13px;color:#7a5f00;line-height:1.8;margin-bottom:16px}
+.setup-box strong{display:block;font-size:14px;margin-bottom:4px}
+.setup-box a{color:#b8860b;font-weight:700}
+.kakao-status{font-size:13px;margin-bottom:12px;min-height:18px}
+
+/* ── Comments ── */
+.comments{margin-top:36px;padding-top:24px;border-top:2px solid var(--ink)}
+.comments h3{font-size:18px;font-weight:800;margin-bottom:20px;display:flex;align-items:center;gap:8px}
+.comments h3 .cnt{color:var(--muted);font-weight:600}
+.comment-form-card{
+  border:1px solid var(--line);border-radius:12px;padding:16px;
+  margin-bottom:28px;background:#fafafa;
+}
+.cfc-head{
+  display:flex;align-items:center;gap:10px;margin-bottom:12px;
+  font-size:13px;font-weight:600;color:var(--muted);
+}
+.comment-form-card textarea{
+  width:100%;border:1px solid var(--line);border-radius:8px;padding:12px;
+  font-family:var(--sans);font-size:14px;resize:vertical;min-height:80px;
+  background:#fff;line-height:1.5;
+}
+.comment-form-card textarea:focus{outline:none;border-color:var(--ink)}
+.cfc-foot{display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+.hint-sm{font-size:11px;color:var(--muted)}
+.btn-sm{padding:7px 16px;font-size:13px;border-radius:6px}
+.login-nudge{background:#f6f6f6;border:1px solid var(--line);border-radius:8px;padding:18px;text-align:center;color:var(--muted);font-size:14px;margin-bottom:24px}
+.login-nudge button{background:none;border:none;color:var(--red);font-weight:700}
+.login-nudge button:hover{text-decoration:underline}
+.comment{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
+.c-av{
+  width:34px;height:34px;border-radius:50%;background:var(--ink);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0;
+}
+.c-main{flex:1}
+.c-top{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.c-name{font-weight:700;font-size:14px}
+.c-time{color:var(--muted);font-size:12px}
+.c-text{font-size:14px;line-height:1.5;color:#222;white-space:pre-wrap;word-break:break-word}
+.c-del{margin-left:auto;background:none;border:none;color:#aaa;font-size:12px;cursor:pointer}
+.c-del:hover{color:var(--red)}
+
+/* ── Buttons & forms ── */
+.btn{background:var(--ink);color:#fff;border:none;border-radius:8px;padding:11px 18px;font-weight:700;font-size:14px;transition:opacity .15s}
+.btn:hover{opacity:.85}
+.btn.red{background:var(--red)}
+.btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.btn.ghost:hover{border-color:#999;opacity:1}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.overlay{position:fixed;inset:0;background:rgba(15,15,15,.55);z-index:90;display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto}
+.overlay.open{display:flex}
+.modal{background:#fff;border-radius:14px;width:100%;max-width:440px;padding:28px;box-shadow:0 24px 60px rgba(0,0,0,.3);animation:pop .15s ease}
+.modal.wide{max-width:620px}
+.modal h2{font-family:var(--serif);font-size:26px;font-weight:700;margin-bottom:6px}
+.m-desc{color:var(--muted);font-size:14px;margin-bottom:22px}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
+.field input,.field textarea,.field select{width:100%;border:1px solid var(--line);border-radius:8px;padding:11px 12px;font-family:var(--sans);font-size:14px}
+.field textarea{resize:vertical;min-height:120px;line-height:1.5}
+.field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--ink)}
+.modal-actions{display:flex;gap:10px;margin-top:8px}
+.modal-actions .btn{flex:1}
+.modal-close{position:absolute;top:14px;right:16px}
+.modal-head{position:relative}
+.switch-line{text-align:center;font-size:13px;color:var(--muted);margin-top:18px}
+.switch-line button{background:none;border:none;color:var(--red);font-weight:700}
+.switch-line button:hover{text-decoration:underline}
+.err{background:#fdeaea;color:var(--red);border:1px solid #f5c6c6;border-radius:8px;padding:10px 12px;font-size:13px;font-weight:600;margin-bottom:16px;display:none}
+.err.show{display:block}
+.hint{font-size:12px;color:var(--muted);margin-top:6px}
+.img-preview{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:8px;border:1px solid var(--line);margin-top:8px;display:none}
+.img-preview.show{display:block}
+.file-label{display:inline-block;border:1px dashed #bbb;border-radius:8px;padding:9px 14px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer}
+.file-label:hover{border-color:#777;color:var(--ink)}
+.user-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.user-row:last-child{border-bottom:none}
+.u-av{width:36px;height:36px;border-radius:50%;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0}
+.u-name{font-weight:700;font-size:14px}
+.user-row select{margin-left:auto;border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-size:13px;font-family:var(--sans)}
+.me-tag{font-size:11px;color:var(--muted);font-weight:600;margin-left:auto}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:12px 20px;border-radius:8px;font-size:14px;font-weight:600;opacity:0;pointer-events:none;transition:all .25s;z-index:120;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+footer{max-width:1100px;margin:40px auto 0;padding:24px 16px;border-top:1px solid var(--line);color:var(--muted);font-size:12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.loading{padding:80px;text-align:center;color:var(--muted);font-size:14px}
+</style>
+</head>
+<body>
+
+<!-- Drawer backdrop -->
+<div class="drawer-backdrop" id="drawerBackdrop" onclick="closeDrawer()"></div>
+
+<!-- Drawer nav panel -->
+<nav class="drawer" id="drawer">
+  <div class="drawer-top">
+    <button class="icon-btn" onclick="closeDrawer()" aria-label="닫기">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+    </button>
+    <span class="drawer-logo">The Chronicle</span>
+    <div style="width:34px"></div>
+  </div>
+  <div id="drawerList"></div>
+</nav>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="left-tools">
+      <button class="icon-btn" onclick="openDrawer()" aria-label="메뉴">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="17" x2="21" y2="17"/></svg>
+      </button>
+      <button class="icon-btn" aria-label="검색" onclick="toast('🔍 검색 기능은 준비 중입니다')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </button>
+    </div>
+    <a class="masthead" href="#" onclick="selectSection(null);return false;">
+      <span class="m-bar"></span><span class="m-the">The</span>Chronicle
+    </a>
+    <div class="profile-wrap">
+      <button class="avatar-pill" id="profileBtn" onclick="toggleMenu(event)">
+        <span id="profileLabel">로그인</span>
+        <span class="avatar-circle guest" id="profileAvatar">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>
+        </span>
+      </button>
+      <div class="menu" id="profileMenu"></div>
+    </div>
+  </div>
+</header>
+
+<div id="app"><div class="loading">불러오는 중…</div></div>
+
+<footer>
+  <span>© <span id="year"></span> The Chronicle — 데모 뉴스 사이트</span>
+  <span>편집 권한: 관리자 · 기자</span>
+</footer>
+
+<!-- Auth modal -->
+<div class="overlay" id="authOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <button class="icon-btn modal-close" onclick="closeAuth()">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+      </button>
+      <h2 id="authTitle">로그인</h2>
+      <p class="m-desc" id="authDesc">계정에 로그인하면 댓글을 남길 수 있습니다.</p>
+    </div>
+    <div class="err" id="authErr"></div>
+    <div class="field"><label>아이디</label><input id="authUser" autocomplete="off" placeholder="아이디" /></div>
+    <div class="field"><label>비밀번호</label><input id="authPass" type="password" placeholder="비밀번호" /></div>
+    <div class="field" id="authPass2Field" style="display:none"><label>비밀번호 확인</label><input id="authPass2" type="password" placeholder="비밀번호 확인" /></div>
+    <div class="modal-actions"><button class="btn red" id="authSubmit" onclick="submitAuth()">로그인</button></div>
+    <div class="switch-line" id="authSwitch"></div>
+  </div>
+</div>
+
+<!-- Write article modal -->
+<div class="overlay" id="writeOverlay">
+  <div class="modal wide">
+    <div class="modal-head">
+      <button class="icon-btn modal-close" onclick="closeWrite()">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+      </button>
+      <h2>기사 작성</h2>
+      <p class="m-desc">작성한 기사는 즉시 메인에 게시됩니다.</p>
+    </div>
+    <div class="err" id="writeErr"></div>
+    <div class="field">
+      <label>카테고리</label>
+      <input id="wCat" list="catList" placeholder="예: 뉴스, 정치, 건강, AI" value="뉴스" />
+      <datalist id="catList"></datalist>
+    </div>
+    <div class="field"><label>제목</label><input id="wTitle" placeholder="기사 제목" /></div>
+    <div class="field"><label>요약 (한두 문장)</label><textarea id="wSum" style="min-height:70px" placeholder="기사 요약"></textarea></div>
+    <div class="field"><label>본문</label><textarea id="wBody" placeholder="기사 본문 (빈 줄로 문단 구분)"></textarea></div>
+    <div class="field">
+      <label>대표 이미지</label>
+      <input id="wImgUrl" placeholder="이미지 URL 붙여넣기 (선택)" oninput="previewImg(this.value)" />
+      <div style="margin-top:8px">
+        <label class="file-label" for="wImgFile">📷 이미지 업로드</label>
+        <input id="wImgFile" type="file" accept="image/*" style="display:none" onchange="onImgFile(event)" />
+      </div>
+      <img class="img-preview" id="wImgPreview" alt="미리보기" />
+      <div class="hint">URL 붙여넣기 또는 기기에서 이미지 업로드 가능</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeWrite()">취소</button>
+      <button class="btn red" onclick="submitArticle()">게시하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- Site settings modal -->
+<div class="overlay" id="settingsOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <button class="icon-btn modal-close" onclick="closeSettings()">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+      </button>
+      <h2>사이트 설정</h2>
+      <p class="m-desc">카카오톡 공유 기능을 활성화합니다.</p>
+    </div>
+    <div class="setup-box">
+      <strong>📋 카카오톡 공유 설정 방법</strong>
+      1. <a href="https://developers.kakao.com" target="_blank">developers.kakao.com</a> 에서 앱 생성<br>
+      2. 내 앱 → 플랫폼 → Web → 사이트 도메인 등록<br>
+      3. 앱 키 → JavaScript 키 복사 후 아래에 입력<br>
+      <span style="opacity:.7;font-size:12px">※ 로컬/Claude 데모 환경에서는 동작하지 않을 수 있습니다.</span>
+    </div>
+    <div class="field">
+      <label>사이트 URL</label>
+      <input id="sSiteUrl" placeholder="https://my-news-site.com" />
+      <div class="hint">카카오 개발자 콘솔에 등록한 도메인과 동일해야 합니다.</div>
+    </div>
+    <div class="field">
+      <label>카카오 JavaScript 앱 키</label>
+      <input id="sKakaoKey" placeholder="예: a1b2c3d4e5f678901234567890abcdef" />
+    </div>
+    <div class="kakao-status" id="kakaoStatus"></div>
+    <div class="modal-actions">
+      <button class="btn ghost" onclick="closeSettings()">취소</button>
+      <button class="btn red" onclick="saveSettings()">저장하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- Manage users modal -->
+<div class="overlay" id="usersOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <button class="icon-btn modal-close" onclick="closeUsers()">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+      </button>
+      <h2>사용자 관리</h2>
+      <p class="m-desc">사용자 역할을 변경합니다. 기자는 기사를 작성할 수 있습니다.</p>
+    </div>
+    <div id="usersList"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ── Storage ── */
+const hasStore = typeof window!=='undefined'&&window.storage&&typeof window.storage.get==='function';
+const memStore = {};
+async function dbGet(key,def){
+  if(hasStore){try{const r=await window.storage.get(key,true);return r?.value!=null?JSON.parse(r.value):def;}catch(e){return def;}}
+  return key in memStore?JSON.parse(memStore[key]):def;
+}
+async function dbSet(key,val){
+  const s=JSON.stringify(val);
+  if(hasStore){try{await window.storage.set(key,s,true);return;}catch(e){}}
+  memStore[key]=s;
+}
+
+/* ── Sections ── */
+const SECTIONS=[
+  {id:'home',name:'홈',filter:null},
+  {id:'news',name:'뉴스',filter:'뉴스',sub:['정치','경제','사회','지역']},
+  {id:'world',name:'국제',filter:'국제',sub:['미국','유럽','아시아','중동']},
+  {id:'sports',name:'스포츠',filter:'스포츠',sub:['축구','야구','농구','e스포츠']},
+  {id:'biz',name:'비즈니스',filter:'비즈니스',sub:['주식','부동산','스타트업','금융']},
+  {id:'tech',name:'기술',filter:'기술',sub:['AI','모바일','인터넷','보안']},
+  {id:'health',name:'건강',filter:'건강'},
+  {id:'culture',name:'문화',filter:'문화',sub:['영화·TV','음악','독서','예술·디자인']},
+  {id:'science',name:'과학',filter:'과학'},
+];
+const ALL_CATS=SECTIONS.flatMap(s=>s.filter?[s.filter,...(s.sub||[])]:[]);
+
+const SEED_ARTICLES=[
+  {id:'a1',category:'건강',author:'admin',
+   title:"수백만 유방암 환자, 항암화학요법을 안전하게 피할 수 있다",
+   summary:"새 임상 연구에 따르면 특정 조건 환자들은 화학요법 없이도 동등한 치료 효과를 기대할 수 있다.",
+   body:"새로운 임상 연구에 따르면 특정 조건의 유방암 환자들은 항암화학요법 없이도 동등한 치료 효과를 기대할 수 있는 것으로 나타났다.\n\n연구진은 유전자 검사 결과를 바탕으로 치료 대상을 선별하면 불필요한 부작용을 줄일 수 있다고 설명했다.\n\n다만 모든 환자에게 적용되는 것은 아니며, 담당 의사와의 상담이 필수적이다.",
+   img:'https://picsum.photos/seed/health22/1200/675',createdAt:Date.now()-3*60*60*1000},
+  {id:'a2',category:'국제',author:'admin',
+   title:"왕실, 앤드루의 논란된 특사 이메일을 6년 전에 전달받았다",
+   summary:"전직 왕자의 재정 거래 관련 수천 통의 이메일이 2020년 이미 왕실에 전달된 것으로 확인됐다.",
+   body:"전직 왕자의 재정 거래에 관한 정보가 담긴 수천 통의 이메일이 2020년에 왕실에 전달된 것으로 확인됐다.\n\n관계자들은 해당 자료가 당시 적절히 검토됐는지 여부에 대해 의문을 제기하고 있다.\n\n전문가들은 이번 사안이 공적 신뢰에 미칠 영향에 주목하고 있다.",
+   img:'https://picsum.photos/seed/royal33/1200/675',createdAt:Date.now()-8*60*60*1000},
+];
+
+/* ── State ── */
+let state={users:[],articles:[],comments:{},current:null,view:{name:'home'},filter:null};
+let expandedSections={};
+
+/* ── Utils ── */
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function initials(n){return(n||'?').trim().slice(0,2).toUpperCase();}
+function timeAgo(ts){
+  const s=Math.floor((Date.now()-ts)/1000);
+  if(s<60)return '방금 전';
+  const m=Math.floor(s/60);if(m<60)return m+'분 전';
+  const h=Math.floor(m/60);if(h<24)return h+'시간 전';
+  const d=Math.floor(h/24);if(d<7)return d+'일 전';
+  return new Date(ts).toLocaleDateString('ko-KR');
+}
+function roleLabel(r){return r==='admin'?'관리자':r==='journalist'?'기자':'회원';}
+function canWrite(){return state.current&&(state.current.role==='admin'||state.current.role==='journalist');}
+function toast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2500);
+}
+function getArticleUrl(id){ return ''; }
+function setMeta(id,val){const e=document.getElementById(id);if(e)e.setAttribute('content',val||'');}
+function updateMeta(article){
+  if(article){
+    document.title=article.title+' | The Chronicle';
+    setMeta('og-t',article.title);setMeta('og-d',article.summary);
+    setMeta('og-i',article.img||'');setMeta('og-u',getArticleUrl(article.id));
+    setMeta('tw-t',article.title);setMeta('tw-d',article.summary);setMeta('tw-i',article.img||'');
+  }else{
+    document.title='The Chronicle';
+    setMeta('og-t','The Chronicle');setMeta('og-d','빠르고 정확한 최신 뉴스.');
+    setMeta('og-i','');setMeta('og-u',window.location.href);
+    setMeta('tw-t','The Chronicle');setMeta('tw-d','');setMeta('tw-i','');
+  }
+}
+
+/* ── Drawer ── */
+function openDrawer(){
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('drawerBackdrop').classList.add('open');
+  document.body.style.overflow='hidden';
+  renderDrawerList();
+}
+function closeDrawer(){
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('drawerBackdrop').classList.remove('open');
+  document.body.style.overflow='';
+}
+function toggleSection(id){expandedSections[id]=!expandedSections[id];renderDrawerList();}
+function selectSection(filter){
+  state.filter=filter||null;
+  closeDrawer();
+  state.view={name:'home'};
+  updateMeta(null);
+  render();
+  window.scrollTo(0,0);
+}
+function renderDrawerList(){
+  const dl=document.getElementById('drawerList');
+  dl.innerHTML=SECTIONS.map(sec=>{
+    const hasSub=sec.sub&&sec.sub.length>0;
+    const isExp=!!expandedSections[sec.id];
+    let row,rowClick;
+    if(!sec.filter){
+      rowClick='onclick="selectSection(null)"';
+      row=`<span>${esc(sec.name)}</span>`;
+    }else if(hasSub){
+      rowClick=`onclick="toggleSection('${sec.id}')"`;
+      row=`<span>${esc(sec.name)}</span>
+        <span class="drawer-chev${isExp?' rot':''}">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </span>`;
+    }else{
+      rowClick=`data-f="${esc(sec.filter)}" onclick="selectSection(this.dataset.f)"`;
+      row=`<span>${esc(sec.name)}</span>`;
+    }
+    const subHtml=hasSub?`<div class="drawer-sub${isExp?' open':''}">
+      <div class="drawer-sub-item all-sub" data-f="${esc(sec.filter)}" onclick="selectSection(this.dataset.f)">전체 ${esc(sec.name)}</div>
+      ${sec.sub.map(s=>`<div class="drawer-sub-item" data-f="${esc(s)}" onclick="selectSection(this.dataset.f)">${esc(s)}</div>`).join('')}
+    </div>`:'';
+    return `<div><div class="drawer-item${isExp?' expanded':''}" ${rowClick}>${row}</div>${subHtml}</div>`;
+  }).join('');
+}
+
+/* ── Profile menu ── */
+function renderProfile(){
+  const label=document.getElementById('profileLabel');
+  const av=document.getElementById('profileAvatar');
+  if(state.current){
+    label.textContent=state.current.username;
+    av.classList.remove('guest');
+    av.innerHTML=esc(initials(state.current.username));
+  }else{
+    label.textContent='로그인';
+    av.classList.add('guest');
+    av.innerHTML='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 4-6 8-6s8 2 8 6"/></svg>';
+  }
+}
+function buildMenu(){
+  const menu=document.getElementById('profileMenu');
+  if(!state.current){
+    menu.innerHTML=`<div class="m-head"><div class="name">방문자</div><div class="sub">로그인 없이 뉴스를 볼 수 있습니다</div></div>
+      <button class="m-item" onclick="openAuth('login')">🔑 로그인</button>
+      <button class="m-item" onclick="openAuth('signup')">✏️ 회원가입</button>`;return;
+  }
+  const r=state.current.role;
+  const tagCls=r==='admin'?'':(r==='journalist'?'journalist':'user');
+  let extra='';
+  if(canWrite())extra+=`<button class="m-item" onclick="openWrite()">📝 기사 작성</button>`;
+  if(r==='admin'){extra+=`<button class="m-item" onclick="openUsers()">👥 사용자 관리</button>`;extra+=`<button class="m-item" onclick="openSettings()">⚙️ 사이트 설정 (카카오)</button>`;}
+  menu.innerHTML=`<div class="m-head">
+    <div class="name">${esc(state.current.username)} <span class="role-tag ${tagCls}">${roleLabel(r)}</span></div>
+    <div class="sub">${r==='user'?'댓글을 남길 수 있습니다':'기사 작성 권한 있음'}</div>
+  </div>${extra}${extra?'<div class="m-sep"></div>':''}
+  <button class="m-item danger" onclick="logout()">↩ 로그아웃</button>`;
+}
+function toggleMenu(e){
+  e.stopPropagation();
+  const menu=document.getElementById('profileMenu');
+  if(menu.classList.contains('open')){menu.classList.remove('open');return;}
+  buildMenu();menu.classList.add('open');
+}
+document.addEventListener('click',()=>document.getElementById('profileMenu').classList.remove('open'));
+
+/* ── Routing ── */
+function goHome(){
+  state.view={name:'home'};
+  updateMeta(null);render();window.scrollTo(0,0);
+}
+function openArticle(id){
+  state.view={name:'article',id};
+  const article=state.articles.find(a=>a.id===id);
+  if(article)updateMeta(article);
+  render();window.scrollTo(0,0);
+}
+
+/* ── Render ── */
+function render(){
+  const app=document.getElementById('app');
+  if(state.view.name==='article'){
+    app.innerHTML=viewArticle(state.view.id);
+    attachCommentKey(state.view.id);
+    return;
+  }
+  app.innerHTML=viewHome();
+}
+function attachCommentKey(aid){
+  const ta=document.getElementById('commentText');
+  if(ta)ta.addEventListener('keydown',e=>{if(e.ctrlKey&&e.key==='Enter')submitComment(aid);});
+}
+
+function viewHome(){
+  const sorted=[...state.articles].sort((a,b)=>b.createdAt-a.createdAt);
+  const filtered=state.filter?sorted.filter(a=>a.category.toLowerCase().includes(state.filter.toLowerCase())):sorted;
+  const filterBar=state.filter?`<div class="filter-bar">
+    <span class="filter-name">● ${esc(state.filter)}</span>
+    <button class="filter-clear" onclick="selectSection(null)">× 전체보기</button>
+  </div>`:'';
+  if(!filtered.length)return`<main>${filterBar}<div class="empty-state">
+    <h3>${state.filter?`'${esc(state.filter)}' 기사가 없습니다`:'아직 게시된 기사가 없습니다'}</h3>
+    <p>관리자 또는 기자가 기사를 작성하면 이곳에 표시됩니다.</p></div></main>`;
+  const lead=filtered[0],rest=filtered.slice(1);
+  const leadImg=lead.img?`<img class="hero-img" src="${esc(lead.img)}" alt="" onerror="this.style.display='none'">` :'';
+  let html=`<main>${filterBar}
+    <div class="kicker">● ${state.filter?esc(state.filter):'헤드라인'}</div>
+    <article class="lead" onclick="openArticle('${lead.id}')">
+      ${leadImg}
+      <h1>${esc(lead.title)}</h1>
+      <p class="l-sum">${esc(lead.summary)}</p>
+      <div class="meta"><span>${timeAgo(lead.createdAt)}</span><span class="dot"></span><span class="cat">${esc(lead.category)}</span></div>
+    </article>
+    <section class="stories">`;
+  for(const s of rest){
+    const thumb=s.img?`<img class="thumb" src="${esc(s.img)}" alt="" onerror="this.classList.add('empty');this.removeAttribute('src')">`:`<div class="thumb empty"></div>`;
+    html+=`<article class="story" onclick="openArticle('${s.id}')">
+      <div>
+        <div class="meta" style="margin:0 0 8px"><span class="cat">${esc(s.category)}</span><span class="dot"></span><span>${timeAgo(s.createdAt)}</span></div>
+        <h2>${esc(s.title)}</h2>
+        <p class="s-sum">${esc(s.summary)}</p>
+      </div>${thumb}
+    </article>`;
+  }
+  html+=`</section></main>`;return html;
+}
+
+function viewArticle(id){
+  const a=state.articles.find(x=>x.id===id);
+  if(!a)return`<main><div class="empty-state"><h3>기사를 찾을 수 없습니다</h3></div></main>`;
+  const img=a.img?`<img class="a-img" src="${esc(a.img)}" alt="" onerror="this.style.display='none'">` :'';
+  const paras=String(a.body).split(/\n\s*\n/).map(p=>`<p>${esc(p).replace(/\n/g,'<br>')}</p>`).join('');
+  const list=state.comments[id]||[];
+  let commentInput;
+  if(state.current){
+    commentInput=`<div class="comment-form-card">
+      <div class="cfc-head">
+        <div class="c-av" style="width:32px;height:32px;font-size:12px">${esc(initials(state.current.username))}</div>
+        <span>${esc(state.current.username)}님의 댓글</span>
+      </div>
+      <textarea id="commentText" placeholder="댓글을 입력하세요… (Ctrl+Enter로 빠른 등록)"></textarea>
+      <div class="cfc-foot">
+        <span class="hint-sm">⌨ Ctrl+Enter</span>
+        <button class="btn red btn-sm" data-aid="${esc(id)}" onclick="submitComment(this.dataset.aid)">등록</button>
+      </div>
+    </div>`;
+  }else{
+    commentInput=`<div class="login-nudge">댓글을 작성하려면 <button onclick="openAuth('login')">로그인</button>이 필요합니다.</div>`;
+  }
+  const commentsHtml=list.length?list.slice().sort((x,y)=>y.createdAt-x.createdAt).map(c=>{
+    const canDel=state.current&&(state.current.username===c.username||state.current.role==='admin');
+    return`<div class="comment">
+      <div class="c-av">${esc(initials(c.username))}</div>
+      <div class="c-main">
+        <div class="c-top"><span class="c-name">${esc(c.username)}</span><span class="c-time">${timeAgo(c.createdAt)}</span>
+          ${canDel?`<button class="c-del" data-cid="${esc(c.id)}" data-aid="${esc(id)}" onclick="deleteComment(this.dataset.aid,this.dataset.cid)">삭제</button>`:''}
+        </div>
+        <div class="c-text">${esc(c.text)}</div>
+      </div>
+    </div>`;
+  }).join(''):`<p style="color:var(--muted);font-size:14px;padding:16px 0">첫 댓글을 남겨보세요.</p>`;
+  let adminBar='';
+  if(state.current&&(state.current.role==='admin'||state.current.username===a.author)){
+    adminBar=`<button class="btn ghost" style="font-size:12px;padding:6px 12px;margin-top:10px" data-id="${esc(a.id)}" onclick="deleteArticle(this.dataset.id)">기사 삭제</button>`;
+  }
+  return`<main><div class="article-wrap">
+    <button class="back-btn" onclick="goHome()">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>홈으로
+    </button>
+    <div class="meta" style="margin:0 0 12px"><span class="cat">${esc(a.category)}</span><span class="dot"></span><span>${timeAgo(a.createdAt)}</span></div>
+    <h1>${esc(a.title)}</h1>
+    <p style="font-family:var(--serif);font-size:clamp(17px,4vw,20px);line-height:1.5;color:#333;margin:14px 0 0">${esc(a.summary)}</p>
+    <div class="meta" style="margin-top:14px">작성: <span class="cat">${esc(a.author)}</span></div>
+    ${adminBar}${img}
+    <div class="a-body">${paras}</div>
+
+    <div class="share-section">
+      <span class="share-label">이 기사 공유하기</span>
+      <button class="share-btn kakao" data-id="${esc(a.id)}" onclick="kakaoShare(this.dataset.id)">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor"><path d="M12 3C6.477 3 2 6.58 2 11c0 2.7 1.55 5.1 3.9 6.6L5 21l3.9-2.1c.99.2 2 .3 3.1.3 5.52 0 10-3.58 10-8S17.52 3 12 3z"/></svg>
+        카카오톡
+      </button>
+      <button class="share-btn" data-id="${esc(a.id)}" onclick="shareArticle(this.dataset.id)">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+          <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+        </svg>공유하기
+      </button>
+      <button class="share-btn" data-id="${esc(a.id)}" onclick="copyArticleLink(this.dataset.id)">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+          <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+        </svg>링크 복사
+      </button>
+    </div>
+
+    <div class="comments">
+      <h3>댓글 <span class="cnt">${list.length}</span></h3>
+      ${commentInput}
+      <div>${commentsHtml}</div>
+    </div>
+  </div></main>`;
+}
+
+/* ── Share ── */
+async function shareArticle(id){
+  const article=state.articles.find(a=>a.id===id);if(!article)return;
+  const shareText=article.title+'\n\n'+article.summary;
+  if(navigator.share){
+    try{await navigator.share({title:article.title,text:shareText});return;}
+    catch(e){if(e.name==='AbortError')return;}
+  }
+  _copyToClipboard(shareText);
+}
+async function copyArticleLink(id){
+  const article=state.articles.find(a=>a.id===id);if(!article)return;
+  _copyToClipboard('['+article.title+']\n'+article.summary);
+}
+async function _copyToClipboard(text){
+  try{await navigator.clipboard.writeText(text);toast('📋 링크가 복사되었습니다!');}
+  catch{
+    const ta=document.createElement('textarea');
+    ta.value=text;ta.style.cssText='position:fixed;left:-9999px;top:-9999px';
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+    toast('📋 링크가 복사되었습니다!');
+  }
+}
+
+/* ── Auth ── */
+let authMode='login';
+function openAuth(mode){
+  authMode=mode;
+  document.getElementById('profileMenu').classList.remove('open');
+  document.getElementById('authErr').classList.remove('show');
+  ['authUser','authPass','authPass2'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('authPass2Field').style.display=mode==='signup'?'block':'none';
+  document.getElementById('authTitle').textContent=mode==='signup'?'회원가입':'로그인';
+  document.getElementById('authDesc').textContent=mode==='signup'?'가입하면 댓글을 남길 수 있습니다.':'계정에 로그인하면 댓글을 남길 수 있습니다.';
+  document.getElementById('authSubmit').textContent=mode==='signup'?'가입하기':'로그인';
+  document.getElementById('authSwitch').innerHTML=mode==='signup'
+    ?`이미 계정이 있으신가요? <button onclick="openAuth('login')">로그인</button>`
+    :`계정이 없으신가요? <button onclick="openAuth('signup')">회원가입</button>`;
+  document.getElementById('authOverlay').classList.add('open');
+}
+function closeAuth(){document.getElementById('authOverlay').classList.remove('open');}
+function authError(msg){const e=document.getElementById('authErr');e.textContent=msg;e.classList.add('show');}
+async function submitAuth(){
+  const u=document.getElementById('authUser').value.trim();
+  const p=document.getElementById('authPass').value;
+  if(!u||!p){authError('아이디와 비밀번호를 입력하세요.');return;}
+  if(authMode==='signup'){
+    const p2=document.getElementById('authPass2').value;
+    if(p!==p2){authError('비밀번호가 일치하지 않습니다.');return;}
+    if(state.users.some(x=>x.username.toLowerCase()===u.toLowerCase())){authError('이미 사용 중인 아이디입니다.');return;}
+    const nu={username:u,password:p,role:'user'};
+    state.users.push(nu);await dbSet('users',state.users);
+    state.current=nu;closeAuth();renderProfile();render();toast('가입 완료! 환영합니다, '+u+'님');
+  }else{
+    const found=state.users.find(x=>x.username.toLowerCase()===u.toLowerCase()&&x.password===p);
+    if(!found){authError('아이디 또는 비밀번호가 올바르지 않습니다.');return;}
+    state.current=found;closeAuth();renderProfile();render();toast(roleLabel(found.role)+'(으)로 로그인했습니다');
+  }
+}
+function logout(){
+  state.current=null;document.getElementById('profileMenu').classList.remove('open');
+  renderProfile();render();toast('로그아웃되었습니다');
+}
+
+/* ── Comments ── */
+async function submitComment(articleId){
+  if(!state.current){openAuth('login');return;}
+  const ta=document.getElementById('commentText');
+  const text=ta?ta.value.trim():'';
+  if(!text)return;
+  if(!state.comments[articleId])state.comments[articleId]=[];
+  state.comments[articleId].push({id:'c'+Date.now()+Math.random().toString(36).slice(2,6),username:state.current.username,text,createdAt:Date.now()});
+  await dbSet('comments',state.comments);
+  render();attachCommentKey(articleId);toast('댓글이 등록되었습니다');
+}
+async function deleteComment(articleId,cid){
+  const arr=state.comments[articleId]||[];
+  state.comments[articleId]=arr.filter(c=>c.id!==cid);
+  await dbSet('comments',state.comments);render();
+}
+
+/* ── Write article ── */
+let pendingImg='';
+function openWrite(){
+  if(!canWrite()){toast('기사 작성 권한이 없습니다');return;}
+  document.getElementById('profileMenu').classList.remove('open');
+  document.getElementById('writeErr').classList.remove('show');
+  ['wCat','wTitle','wSum','wBody','wImgUrl'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=id==='wCat'?'뉴스':'';});
+  // populate datalist
+  const dl=document.getElementById('catList');
+  if(dl)dl.innerHTML=ALL_CATS.map(c=>`<option value="${esc(c)}">`).join('');
+  pendingImg='';
+  const pv=document.getElementById('wImgPreview');if(pv){pv.classList.remove('show');pv.removeAttribute('src');}
+  document.getElementById('writeOverlay').classList.add('open');
+}
+function closeWrite(){document.getElementById('writeOverlay').classList.remove('open');}
+function previewImg(url){
+  pendingImg=url.trim();
+  const pv=document.getElementById('wImgPreview');if(!pv)return;
+  if(pendingImg){pv.src=pendingImg;pv.classList.add('show');}else{pv.classList.remove('show');}
+}
+function onImgFile(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=()=>{
+    const img=new Image();
+    img.onload=()=>{
+      const max=1200,scale=Math.min(1,max/img.width);
+      const cv=document.createElement('canvas');cv.width=img.width*scale;cv.height=img.height*scale;
+      cv.getContext('2d').drawImage(img,0,0,cv.width,cv.height);
+      pendingImg=cv.toDataURL('image/jpeg',.8);
+      const pv=document.getElementById('wImgPreview');if(pv){pv.src=pendingImg;pv.classList.add('show');}
+      const ui=document.getElementById('wImgUrl');if(ui)ui.value='';
+    };img.src=reader.result;
+  };reader.readAsDataURL(file);
+}
+async function submitArticle(){
+  if(!canWrite())return;
+  const cat=(document.getElementById('wCat').value||'').trim()||'뉴스';
+  const title=(document.getElementById('wTitle').value||'').trim();
+  const sum=(document.getElementById('wSum').value||'').trim();
+  const body=(document.getElementById('wBody').value||'').trim();
+  const err=document.getElementById('writeErr');
+  if(!title||!body){err.textContent='제목과 본문은 필수입니다.';err.classList.add('show');return;}
+  const article={id:'a'+Date.now(),category:cat,title,summary:sum||body.slice(0,80)+'…',body,img:pendingImg||'',author:state.current.username,createdAt:Date.now()};
+  state.articles.push(article);
+  await dbSet('articles',state.articles);
+  closeWrite();goHome();toast('기사가 게시되었습니다');
+}
+async function deleteArticle(id){
+  const article=state.articles.find(a=>a.id===id);
+  if(!state.current||(state.current.role!=='admin'&&state.current.username!==article?.author))return;
+  state.articles=state.articles.filter(a=>a.id!==id);
+  delete state.comments[id];
+  await dbSet('articles',state.articles);await dbSet('comments',state.comments);
+  goHome();toast('기사가 삭제되었습니다');
+}
+
+/* ── User management ── */
+function openUsers(){
+  if(!state.current||state.current.role!=='admin')return;
+  document.getElementById('profileMenu').classList.remove('open');
+  renderUsers();document.getElementById('usersOverlay').classList.add('open');
+}
+function closeUsers(){document.getElementById('usersOverlay').classList.remove('open');}
+function renderUsers(){
+  const list=document.getElementById('usersList');
+  list.innerHTML=state.users.map(u=>{
+    const isMe=state.current&&state.current.username===u.username;
+    const sel=isMe?`<span class="me-tag">나 (관리자)</span>`
+      :`<select data-un="${esc(u.username)}" onchange="changeRole(this.dataset.un,this.value)">
+          <option value="user" ${u.role==='user'?'selected':''}>회원</option>
+          <option value="journalist" ${u.role==='journalist'?'selected':''}>기자</option>
+          <option value="admin" ${u.role==='admin'?'selected':''}>관리자</option>
+        </select>`;
+    return`<div class="user-row">
+      <div class="u-av">${esc(initials(u.username))}</div>
+      <div><div class="u-name">${esc(u.username)}</div><div style="font-size:12px;color:var(--muted)">${roleLabel(u.role)}</div></div>
+      ${sel}
+    </div>`;
+  }).join('');
+}
+async function changeRole(username,role){
+  const u=state.users.find(x=>x.username===username);if(!u)return;
+  u.role=role;await dbSet('users',state.users);
+  if(state.current&&state.current.username===username)state.current.role=role;
+  renderUsers();renderProfile();toast(username+' → '+roleLabel(role));
+}
+
+/* ── Settings & Kakao Share ── */
+let settings={siteUrl:'',kakaoAppKey:''};
+
+function openSettings(){
+  if(!state.current||state.current.role!=='admin')return;
+  document.getElementById('profileMenu').classList.remove('open');
+  document.getElementById('sSiteUrl').value=settings.siteUrl||'';
+  document.getElementById('sKakaoKey').value=settings.kakaoAppKey||'';
+  const el=document.getElementById('kakaoStatus');
+  if(el) el.innerHTML = window.Kakao&&Kakao.isInitialized()
+    ? '<span style="color:green">✅ 카카오 SDK 초기화됨</span>'
+    : '<span style="color:var(--muted)">⚠️ 아직 초기화되지 않음 (저장 후 자동 적용)</span>';
+  document.getElementById('settingsOverlay').classList.add('open');
+}
+function closeSettings(){document.getElementById('settingsOverlay').classList.remove('open');}
+async function saveSettings(){
+  settings.siteUrl=(document.getElementById('sSiteUrl').value||'').trim();
+  settings.kakaoAppKey=(document.getElementById('sKakaoKey').value||'').trim();
+  await dbSet('settings',settings);
+  if(settings.kakaoAppKey&&window.Kakao){
+    try{
+      if(Kakao.isInitialized())Kakao.cleanup();
+      Kakao.init(settings.kakaoAppKey);
+      toast('✅ 카카오 앱 키 저장 및 초기화 완료');
+    }catch(e){toast('⚠️ 카카오 초기화 실패: '+e.message);}
+  }else{
+    toast('⚙️ 설정이 저장되었습니다');
+  }
+  closeSettings();
+}
+async function kakaoShare(id){
+  const article=state.articles.find(a=>a.id===id);if(!article)return;
+  if(window.Kakao&&Kakao.isInitialized()){
+    try{
+      const base=settings.siteUrl||location.origin||'https://thechronicle.example.com';
+      await Kakao.Share.sendDefault({
+        objectType:'feed',
+        content:{
+          title:article.title,
+          description:article.summary,
+          imageUrl:article.img||'',
+          link:{mobileWebUrl:base,webUrl:base}
+        }
+      });
+      return;
+    }catch(e){
+      if(!(e instanceof TypeError)&&e.name!=='AbortError'){
+        toast('⚠️ 카카오 공유 실패. 앱 키·도메인 등록을 확인하세요.');return;
+      }
+    }
+  }else{
+    toast('⚠️ 관리자 메뉴 → 사이트 설정에서 카카오 앱 키를 입력하세요.');
+    return;
+  }
+}
+
+/* ── Init ── */
+async function init(){
+  document.getElementById('year').textContent=new Date().getFullYear();
+  settings=await dbGet('settings',{siteUrl:'',kakaoAppKey:''});
+  if(settings.kakaoAppKey&&window.Kakao){
+    try{if(!Kakao.isInitialized())Kakao.init(settings.kakaoAppKey);}catch(e){}
+  }
+  state.users=await dbGet('users',null);
+  if(!state.users){state.users=[{username:'admin',password:'admin',role:'admin'}];await dbSet('users',state.users);}
+  state.articles=await dbGet('articles',null);
+  if(!state.articles){state.articles=SEED_ARTICLES;await dbSet('articles',state.articles);}
+  state.comments=await dbGet('comments',{});
+  // URL routing
+  const p=new URLSearchParams(window.location.search);
+  const aId=p.get('a');
+  if(aId){
+    state.view={name:'article',id:aId};
+    const art=state.articles.find(x=>x.id===aId);
+    if(art)updateMeta(art);
+  }
+  renderProfile();render();
+}
+init();
+</script>
+</body>
+</html>
