@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>The Chronicle</title>
+<title>The Seoul</title>
 <!-- OG / Twitter meta (JS로 동적 업데이트) -->
-<meta id="og-t" property="og:title" content="The Chronicle" />
-<meta id="og-d" property="og:description" content="The Chronicle — 빠르고 정확한 최신 뉴스." />
+<meta id="og-t" property="og:title" content="The Seoul" />
+<meta id="og-d" property="og:description" content="The Seoul — 빠르고 정확한 최신 뉴스." />
 <meta id="og-i" property="og:image" content="" />
 <meta id="og-u" property="og:url" content="" />
 <meta property="og:type" content="article" />
-<meta property="og:site_name" content="The Chronicle" />
+<meta property="og:site_name" content="The Seoul" />
 <meta id="tw-c" name="twitter:card" content="summary_large_image" />
-<meta id="tw-t" name="twitter:title" content="The Chronicle" />
+<meta id="tw-t" name="twitter:title" content="The Seoul" />
 <meta id="tw-d" name="twitter:description" content="" />
 <meta id="tw-i" name="twitter:image" content="" />
 <script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.4/kakao.min.js" crossorigin="anonymous"></script>
@@ -34,6 +34,21 @@ button{font-family:var(--sans);cursor:pointer}
 a{color:inherit;text-decoration:none}
 
 /* ── Drawer backdrop ── */
+
+/* ── Search ── */
+.search-wrap{background:var(--ink);position:sticky;top:64px;z-index:38;overflow:hidden;max-height:0;transition:max-height .22s ease}
+.search-wrap.open{max-height:76px}
+.search-inner{max-width:1100px;margin:0 auto;padding:12px 16px;display:flex;align-items:center;gap:14px}
+.search-input{flex:1;background:none;border:none;border-bottom:2px solid rgba(255,255,255,.3);color:#fff;font-family:var(--serif);font-size:clamp(18px,5vw,26px);padding:4px 0;outline:none;transition:border-color .15s}
+.search-input::placeholder{color:rgba(255,255,255,.35)}
+.search-input:focus{border-bottom-color:#fff}
+.search-icon-w{color:rgba(255,255,255,.6);flex-shrink:0}
+.search-close{background:none;border:none;color:rgba(255,255,255,.7);display:flex;align-items:center;justify-content:center;width:34px;height:34px;cursor:pointer;flex-shrink:0}
+.search-close:hover{color:#fff}
+.search-header{display:flex;align-items:baseline;gap:10px;padding:20px 0 4px}
+.search-cnt{color:var(--muted);font-size:13px;font-weight:600}
+mark{background:#fff176;color:var(--ink);border-radius:2px;padding:0 2px;font-style:normal}
+
 .drawer-backdrop{
   position:fixed;inset:0;background:rgba(0,0,0,.52);z-index:45;
   pointer-events:none;opacity:0;transition:opacity .28s;
@@ -218,6 +233,19 @@ main{max-width:1100px;margin:0 auto;padding:0 16px}
   cursor:pointer;transition:background .15s,border-color .15s;font-family:var(--sans);
 }
 .share-btn:hover{background:#efefef;border-color:#bbb}
+.url-box{
+  width:100%;margin-top:12px;background:#f7f7f7;border:1px solid var(--line);
+  border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:8px;
+}
+.url-text{
+  flex:1;font-size:12px;color:var(--muted);word-break:break-all;
+  font-family:monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.url-copy-btn{
+  background:var(--ink);color:#fff;border:none;border-radius:6px;
+  padding:5px 10px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;
+}
+.url-copy-btn:hover{opacity:.8}
 .share-btn.kakao{background:#FEE500;border-color:#FEE500;color:#191919;font-weight:800}
 .share-btn.kakao:hover{background:#fad900;border-color:#e6c800}
 .setup-box{background:#fffbea;border:1px solid #f5de6a;border-radius:8px;padding:14px 16px;font-size:13px;color:#7a5f00;line-height:1.8;margin-bottom:16px}
@@ -317,7 +345,7 @@ footer{max-width:1100px;margin:40px auto 0;padding:24px 16px;border-top:1px soli
     <button class="icon-btn" onclick="closeDrawer()" aria-label="닫기">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
     </button>
-    <span class="drawer-logo">The Chronicle</span>
+    <span class="drawer-logo">The Seoul</span>
     <div style="width:34px"></div>
   </div>
   <div id="drawerList"></div>
@@ -329,12 +357,12 @@ footer{max-width:1100px;margin:40px auto 0;padding:24px 16px;border-top:1px soli
       <button class="icon-btn" onclick="openDrawer()" aria-label="메뉴">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="7" x2="21" y2="7"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="17" x2="21" y2="17"/></svg>
       </button>
-      <button class="icon-btn" aria-label="검색" onclick="toast('🔍 검색 기능은 준비 중입니다')">
+      <button class="icon-btn" aria-label="검색" onclick="toggleSearch()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       </button>
     </div>
     <a class="masthead" href="#" onclick="selectSection(null);return false;">
-      <span class="m-bar"></span><span class="m-the">The</span>Chronicle
+      <span class="m-bar"></span><span class="m-the">The</span>Seoul
     </a>
     <div class="profile-wrap">
       <button class="avatar-pill" id="profileBtn" onclick="toggleMenu(event)">
@@ -348,10 +376,28 @@ footer{max-width:1100px;margin:40px auto 0;padding:24px 16px;border-top:1px soli
   </div>
 </header>
 
+<div class="search-wrap" id="searchWrap">
+  <div class="search-inner">
+    <svg class="search-icon-w" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">
+      <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+    <input id="searchInput" class="search-input" type="search" autocomplete="off"
+      placeholder="기사 검색…"
+      oninput="onSearchInput(event)"
+      onkeydown="if(event.key==='Escape')closeSearchBar()" />
+    <button class="search-close" onclick="closeSearchBar()" aria-label="닫기">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/>
+      </svg>
+    </button>
+  </div>
+</div>
+
+
 <div id="app"><div class="loading">불러오는 중…</div></div>
 
 <footer>
-  <span>© <span id="year"></span> The Chronicle — 데모 뉴스 사이트</span>
+  <span>© <span id="year"></span> The Seoul — 데모 뉴스 사이트</span>
   <span>편집 권한: 관리자 · 기자</span>
 </footer>
 
@@ -522,33 +568,48 @@ function toast(msg){
   const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
   clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2500);
 }
-function getArticleUrl(id){
+// getArticleUrl → getCurrentArticleUrl 로 대체됨
+// getArticlePath → buildUrl({a:id}) 로 대체됨
+function buildUrl(params){
+  // params: {a, cat, q} — 없으면 해당 키 제거
+  try{
+    const u=new URL(location.href);
+    ['a','cat','q'].forEach(k=>u.searchParams.delete(k));
+    Object.entries(params).forEach(([k,v])=>{ if(v!=null&&v!=='') u.searchParams.set(k,v); });
+    return u.pathname+( u.search||'' );
+  }catch(e){ return location.pathname; }
+}
+function safePush(params){
+  try{ history.pushState(params,'',buildUrl(params)); }catch(e){}
+}
+function safeReplace(params){
+  try{ history.replaceState(params,'',buildUrl(params)); }catch(e){}
+}
+function getCurrentArticleUrl(id){
+  // 실제 배포 URL (사이트 설정의 siteUrl 우선)
   if(settings.siteUrl&&settings.siteUrl.startsWith('http')){
-    return settings.siteUrl.replace(/\/$/,'')+'?a='+encodeURIComponent(id);
+    const base=settings.siteUrl.replace(/\/$/,'');
+    return base+'?a='+encodeURIComponent(id);
   }
-  // 배포 환경에서 siteUrl 미설정 시 현재 origin 사용
   try{
     if(location.protocol==='http:'||location.protocol==='https:'){
       return location.origin+location.pathname+'?a='+encodeURIComponent(id);
     }
   }catch(e){}
-  return '';
+  return '?a='+encodeURIComponent(id);
 }
-function getArticlePath(id){ return '?a='+encodeURIComponent(id); }
-function safePush(url){ try{ history.pushState({},'',url); }catch(e){} }
-function safeReplace(url){ try{ history.replaceState({},'',url); }catch(e){} }
 function setMeta(id,val){const e=document.getElementById(id);if(e)e.setAttribute('content',val||'');}
 function updateMeta(article){
   if(article){
-    document.title=article.title+' | The Chronicle';
+    document.title=article.title+' | The Seoul';
     setMeta('og-t',article.title);setMeta('og-d',article.summary);
     setMeta('og-i',article.img||'');setMeta('og-u',getArticleUrl(article.id));
     setMeta('tw-t',article.title);setMeta('tw-d',article.summary);setMeta('tw-i',article.img||'');
   }else{
-    document.title='The Chronicle';
-    setMeta('og-t','The Chronicle');setMeta('og-d','빠르고 정확한 최신 뉴스.');
+    document.title='The Seoul';
+    setMeta('og-t','The Seoul');setMeta('og-d','빠르고 정확한 최신 뉴스.');
     setMeta('og-i','');setMeta('og-u',window.location.href);
-    setMeta('tw-t','The Chronicle');setMeta('tw-d','');setMeta('tw-i','');
+    setMeta('tw-t','The Seoul');setMeta('tw-d','');setMeta('tw-i','');
   }
 }
 
@@ -569,7 +630,7 @@ function selectSection(filter){
   state.filter=filter||null;
   closeDrawer();
   state.view={name:'home'};
-  safePush(location.pathname);
+  safePush(filter?{cat:filter}:{});
   updateMeta(null);
   render();
   window.scrollTo(0,0);
@@ -643,28 +704,36 @@ document.addEventListener('click',()=>document.getElementById('profileMenu').cla
 
 /* ── Routing ── */
 function goHome(){
+  state.filter=null;
   state.view={name:'home'};
-  safePush(location.pathname);
+  safePush({});
   updateMeta(null);render();window.scrollTo(0,0);
 }
 function openArticle(id){
+  closeSearchBar(false);
   state.view={name:'article',id};
-  safePush(getArticlePath(id));
+  safePush({a:id});
   const article=state.articles.find(a=>a.id===id);
   if(article)updateMeta(article);
   render();window.scrollTo(0,0);
 }
 
 try{
-  window.addEventListener('popstate',()=>{
+  window.addEventListener('popstate',(ev)=>{
     try{
       const p=new URLSearchParams(location.search);
-      const a=p.get('a');
+      const a=p.get('a'), cat=p.get('cat'), q=p.get('q');
       if(a){
         state.view={name:'article',id:a};
         const art=state.articles.find(x=>x.id===a);
         if(art)updateMeta(art);
+      }else if(q){
+        state.view={name:'search',query:q};
+        const si=document.getElementById('searchInput');
+        if(si){si.value=q; document.getElementById('searchWrap').classList.add('open');}
+        updateMeta(null);
       }else{
+        state.filter=cat||null;
         state.view={name:'home'};
         updateMeta(null);
       }
@@ -673,9 +742,90 @@ try{
   });
 }catch(e){}
 
+/* ── Search ── */
+let searchOpen=false;
+function toggleSearch(){
+  searchOpen=!searchOpen;
+  const wrap=document.getElementById('searchWrap');
+  if(searchOpen){
+    wrap.classList.add('open');
+    setTimeout(()=>{const i=document.getElementById('searchInput');if(i)i.focus();},50);
+  }else{
+    closeSearchBar();
+  }
+}
+function closeSearchBar(goBackHome=true){
+  searchOpen=false;
+  const wrap=document.getElementById('searchWrap');
+  if(wrap)wrap.classList.remove('open');
+  const si=document.getElementById('searchInput');
+  if(si)si.value='';
+  if(goBackHome&&state.view.name==='search'){state.view={name:'home'};safePush({});render();}
+}
+function onSearchInput(e){
+  const q=e.target.value.trim();
+  if(!q){
+    if(state.view.name==='search'){state.view={name:'home'};render();}
+    return;
+  }
+  state.view={name:'search',query:q};
+  safePush({q:q});
+  render();
+}
+function highlightMatch(escapedHtml,rawQuery){
+  const safeQ=esc(rawQuery).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  try{return escapedHtml.replace(new RegExp('('+safeQ+')','gi'),'<mark>$1</mark>');}
+  catch(e){return escapedHtml;}
+}
+function viewSearch(query){
+  if(!query) return viewHome();
+  const q=query.toLowerCase();
+  const results=[...state.articles].filter(a=>
+    a.title.toLowerCase().includes(q)||
+    a.summary.toLowerCase().includes(q)||
+    a.body.toLowerCase().includes(q)||
+    a.category.toLowerCase().includes(q)||
+    a.author.toLowerCase().includes(q)
+  ).sort((a,b)=>b.createdAt-a.createdAt);
+
+  const headerHtml=`<div class="search-header">
+    <span class="kicker" style="margin:0">● 검색결과</span>
+    <span class="search-cnt">"${esc(query)}" · ${results.length}건</span>
+  </div>`;
+
+  if(!results.length){
+    return`<main>${headerHtml}<div class="empty-state" style="padding:40px 0">
+      <h3>'${esc(query)}' 검색 결과가 없습니다</h3>
+      <p>다른 키워드로 검색해보세요.</p>
+    </div></main>`;
+  }
+
+  let html=`<main>${headerHtml}<section class="stories">`;
+  for(const s of results){
+    const thumb=s.img
+      ?`<img class="thumb" src="${esc(s.img)}" alt="" onerror="this.classList.add('empty');this.removeAttribute('src')">`
+      :`<div class="thumb empty"></div>`;
+    html+=`<article class="story" onclick="openArticle('${s.id}')">
+      <div>
+        <div class="meta" style="margin:0 0 8px">
+          <span class="cat">${esc(s.category)}</span><span class="dot"></span><span>${timeAgo(s.createdAt)}</span>
+        </div>
+        <h2>${highlightMatch(esc(s.title),query)}</h2>
+        <p class="s-sum">${highlightMatch(esc(s.summary),query)}</p>
+      </div>${thumb}
+    </article>`;
+  }
+  html+=`</section></main>`;
+  return html;
+}
+
 /* ── Render ── */
 function render(){
   const app=document.getElementById('app');
+  if(state.view.name==='search'){
+    app.innerHTML=viewSearch(state.view.query||'');
+    return;
+  }
   if(state.view.name==='article'){
     app.innerHTML=viewArticle(state.view.id);
     attachCommentKey(state.view.id);
@@ -789,6 +939,7 @@ function viewArticle(id){
           <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
         </svg>링크 복사
       </button>
+      <div id="urlBox-${esc(a.id)}" class="url-box" style="display:none"></div>
     </div>
 
     <div class="comments">
@@ -802,9 +953,8 @@ function viewArticle(id){
 /* ── Share ── */
 async function shareArticle(id){
   const article=state.articles.find(a=>a.id===id);if(!article)return;
-  const articleUrl=getArticleUrl(id);
+  const articleUrl=getCurrentArticleUrl(id);
   const shareText=article.title+'\n\n'+article.summary;
-  safeReplace(getArticlePath(id));
   if(navigator.share){
     try{await navigator.share({title:article.title,text:shareText,url:articleUrl});return;}
     catch(e){if(e.name==='AbortError')return;}
@@ -812,10 +962,23 @@ async function shareArticle(id){
   _copyToClipboard(articleUrl||shareText);
 }
 async function copyArticleLink(id){
-  const url=getArticleUrl(id);
-  safeReplace(getArticlePath(id));
-  _copyToClipboard(url||('['+((state.articles.find(a=>a.id===id)||{}).title||'')+']'));
+  const url=getCurrentArticleUrl(id);
+  // URL 박스 토글 표시
+  const box=document.getElementById('urlBox-'+id);
+  if(box){
+    if(box.style.display==='none'||!box.style.display){
+      box.style.display='flex';
+      const displayUrl = url||('?a='+encodeURIComponent(id));
+      box.innerHTML=`<span class="url-text">${esc(displayUrl)}</span>
+        <button class="url-copy-btn" onclick="doCopy('${esc(displayUrl)}')">복사</button>`;
+    }else{
+      box.style.display='none';
+    }
+  }
+  if(url) _copyToClipboard(url);
+  else toast('⚙️ 사이트 설정에서 배포 URL을 입력하면 복사됩니다');
 }
+function doCopy(text){ _copyToClipboard(text); }
 async function _copyToClipboard(text){
   try{await navigator.clipboard.writeText(text);toast('📋 링크가 복사되었습니다!');}
   catch{
@@ -1046,14 +1209,20 @@ async function init(){
   state.articles=await dbGet('articles',null);
   if(!state.articles){state.articles=SEED_ARTICLES;await dbSet('articles',state.articles);}
   state.comments=await dbGet('comments',{});
-  // URL routing
+  // URL routing — a(기사) / cat(카테고리) / q(검색) 지원
   try{
     const p=new URLSearchParams(location.search);
-    const aId=p.get('a');
+    const aId=p.get('a'), cat=p.get('cat'), q=p.get('q');
     if(aId){
       state.view={name:'article',id:aId};
       const art=state.articles.find(x=>x.id===aId);
       if(art)updateMeta(art);
+    }else if(q){
+      state.filter=null;
+      state.view={name:'search',query:q};
+    }else if(cat){
+      state.filter=cat;
+      state.view={name:'home'};
     }
   }catch(e){}
   renderProfile();render();
